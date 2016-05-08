@@ -150,7 +150,13 @@ public class ReactMapMarker {
     }
 
     private BitmapDescriptor getBitmapDescriptorByName(String name) {
-        return BitmapDescriptorFactory.fromResource(getDrawableResourceByName(name));
+        //add support for react-native-vector-icons
+        if(name.startsWith("file")){ //    /file:/data/data/com.share/cache/-vioav8_48@2x.png
+            String newName = name.split(":")[1];
+            return BitmapDescriptorFactory.fromPath(newName);
+        }else{
+            return BitmapDescriptorFactory.fromResource(getDrawableResourceByName(name));
+        }
     }
 
     private BitmapDescriptor getIcon() {
