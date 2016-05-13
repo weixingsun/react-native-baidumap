@@ -6,11 +6,20 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
+
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.uimanager.events.Event;
+import com.facebook.react.uimanager.events.RCTEventEmitter; 
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +27,7 @@ import java.util.List;
 /**
  * Created by yiyang on 16/2/29.
  */
-public class ReactMapView {
+public class ReactMapView implements BaiduMap.OnMapStatusChangeListener {
 
     private MapView mMapView;
 
@@ -44,6 +53,25 @@ public class ReactMapView {
 
     public ReactMapView(MapView mapView) {
         this.mMapView = mapView;
+        mapView.getMap().setOnMapStatusChangeListener(this);  
+    }
+
+    public void onMapStatusChangeStart(MapStatus status) {
+        //updateMapState();
+    }
+    public void onMapStatusChangeFinish(MapStatus status) {
+        LatLng center = status.target;
+        //geoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(cenpt));
+        //System.out.println("lat:"+center.latitude+", lng:"+center.longitude);
+        WritableMap event = Arguments.createMap();
+        event.putDouble("latitude",center.latitude);
+        event.putDouble("longitude",center.longitude);
+        event.putDouble("zoom",status.zoom);
+        ReactContext reactContext = (ReactContext)this.mMapView.getContext();
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("regionChange", event);
+    }
+    public void onMapStatusChange(MapStatus status) {
+        //updateMapState();
     }
 
     public BaiduMap getMap() {
