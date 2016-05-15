@@ -67,7 +67,9 @@ var KKLocation = {
    * options: timeout (ms), maximumAge (ms), enableHighAccuracy (bool), distanceFilter(m)
    */
   watchPosition: function(success: Function, error?: Function, options?: GeoOptions): number {
+    //alert('watchPosition()'+updatesEnabled)
     if (!updatesEnabled) {
+      alert('watchPosition()'+updatesEnabled+ ', options'+JSON.stringify(options))
       KKLocationObserver.startObserving(options || {});
       updatesEnabled = true;
     }
@@ -110,7 +112,7 @@ var KKLocation = {
 
   stopObserving: function() {
     if (updatesEnabled) {
-      RCTLocationObserver.stopObserving();
+      KKLocationObserver.stopObserving();
       updatesEnabled = false;
       for (var ii = 0; ii < subscriptions.length; ii++) {
         var sub = subscriptions[ii];

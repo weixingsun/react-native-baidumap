@@ -6,6 +6,7 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
@@ -27,7 +28,7 @@ import java.util.List;
 /**
  * Created by yiyang on 16/2/29.
  */
-public class ReactMapView implements BaiduMap.OnMapStatusChangeListener {
+public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMap.OnMarkerClickListener {
 
     private MapView mMapView;
 
@@ -54,6 +55,7 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener {
     public ReactMapView(MapView mapView) {
         this.mMapView = mapView;
         mapView.getMap().setOnMapStatusChangeListener(this);  
+        mapView.getMap().setOnMarkerClickListener(this);  
     }
 
     public void onMapStatusChangeStart(MapStatus status) {
@@ -72,6 +74,16 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener {
     }
     public void onMapStatusChange(MapStatus status) {
         //updateMapState();
+    }
+
+    public boolean onMarkerClick(Marker marker) {
+        WritableMap event = Arguments.createMap();
+        event.putDouble("latitude", marker.getPosition().latitude);
+        event.putDouble("longitude",marker.getPosition().longitude);
+        event.putString("title",marker.getTitle());
+        ReactContext reactContext = (ReactContext)this.mMapView.getContext();
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("markerClick", event);
+        return true;
     }
 
     public BaiduMap getMap() {
