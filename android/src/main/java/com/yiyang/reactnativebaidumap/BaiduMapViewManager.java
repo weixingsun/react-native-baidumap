@@ -161,6 +161,7 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
             double longitude = center.getDouble("longitude");
             MapStatus mapStatus = new MapStatus.Builder()
                     .target(new LatLng(latitude, longitude))
+                    .zoom((float)center.getDouble("zoom"))
                     .build();
             mapView.getMap().animateMapStatus(MapStatusUpdateFactory.newMapStatus(mapStatus));
         }
