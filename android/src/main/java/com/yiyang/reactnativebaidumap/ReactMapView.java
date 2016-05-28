@@ -69,6 +69,8 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
         event.putDouble("latitude",center.latitude);
         event.putDouble("longitude",center.longitude);
         event.putDouble("zoom",status.zoom);
+        event.putDouble("latitudeDelta",Math.abs(status.bound.northeast.latitude-status.bound.southwest.latitude));
+        event.putDouble("longitudeDelta",Math.abs(status.bound.northeast.longitude-status.bound.southwest.longitude));
         ReactContext reactContext = (ReactContext)this.mMapView.getContext();
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("regionChange", event);
     }
@@ -81,6 +83,7 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
         event.putDouble("latitude", marker.getPosition().latitude);
         event.putDouble("longitude",marker.getPosition().longitude);
         event.putString("title",marker.getTitle());
+        //event.putString("id",marker.getId());
         ReactContext reactContext = (ReactContext)this.mMapView.getContext();
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("markerClick", event);
         return true;
