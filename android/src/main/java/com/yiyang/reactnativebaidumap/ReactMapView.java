@@ -65,14 +65,18 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
         LatLng center = status.target;
         //geoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(cenpt));
         //System.out.println("lat:"+center.latitude+", lng:"+center.longitude);
-        WritableMap event = Arguments.createMap();
-        event.putDouble("latitude",center.latitude);
-        event.putDouble("longitude",center.longitude);
-        event.putDouble("zoom",status.zoom);
-        event.putDouble("latitudeDelta",Math.abs(status.bound.northeast.latitude-status.bound.southwest.latitude));
-        event.putDouble("longitudeDelta",Math.abs(status.bound.northeast.longitude-status.bound.southwest.longitude));
+        WritableMap region = Arguments.createMap();
+        region.putDouble("latitude",center.latitude);
+        region.putDouble("longitude",center.longitude);
+        region.putDouble("zoom",status.zoom);
+        region.putDouble("latitudeDelta",Math.abs(status.bound.northeast.latitude-status.bound.southwest.latitude));
+        region.putDouble("longitudeDelta",Math.abs(status.bound.northeast.longitude-status.bound.southwest.longitude));
         ReactContext reactContext = (ReactContext)this.mMapView.getContext();
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("regionChange", event);
+        //reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("regionChange", event);
+        WritableMap event = Arguments.createMap();
+        event.putMap("region", region);
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(this.mMapView.getId(), "topChange", event);
+        //manager.pushEvent(infoWindow, "", event);
     }
     public void onMapStatusChange(MapStatus status) {
         //updateMapState();
