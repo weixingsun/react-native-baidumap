@@ -1,19 +1,7 @@
 'use strict';
 
-import React from 'react-native';
-
-let {
-    EdgeInsetsPropType,
-    Image,
-    NativeMethodsMixin,
-    Platform,
-    requireNativeComponent,
-    StyleSheet,
-    View,
-    UIManager,
-    processColor,
-    ColorPropType,
-} = React;
+import React, {Component, PropTypes} from "react";
+import { EdgeInsetsPropType,Image,NativeMethodsMixin,Platform,requireNativeComponent,StyleSheet,processColor,ColorPropType,UIManager,View, } from 'react-native';
 
 import deprecatedPropType from 'react-native/Libraries/Utilities/deprecatedPropType';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
