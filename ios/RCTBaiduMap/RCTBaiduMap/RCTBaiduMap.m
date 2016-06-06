@@ -136,15 +136,31 @@ const CGFloat RCTBaiduMapZoomBoundBuffer = 0.01;
     if (!CLLocationCoordinate2DIsValid(region.center)) {
         return;
     }
-    
-    if (!region.span.latitudeDelta) {
-        region.span.latitudeDelta = self.region.span.latitudeDelta;
-    }
-    if (!region.span.longitudeDelta) {
-        region.span.longitudeDelta = self.region.span.longitudeDelta;
-    }
-    
-    [super setRegion:region animated:animated];
+    //[super setRegion:region animated:animated];
+    /*NSLog(@"setRegion():new_region.center[%f,%f] span:%f,%f,  self_region.center[%f,%f] span:%f,%f",
+            region.center.latitude,region.center.longitude, region.span.latitudeDelta,region.span.longitudeDelta,
+            self.region.center.latitude,self.region.center.longitude, self.region.span.latitudeDelta,self.region.span.longitudeDelta);   
+    */
+    //if (!region.span.latitudeDelta) {
+    //    region.span.latitudeDelta = self.region.span.latitudeDelta;
+    //}
+    //if (!region.span.longitudeDelta) {
+    //    region.span.longitudeDelta = self.region.span.longitudeDelta;
+    //}
+    //BMKCoordinateRegion adjustedRegion = [super regionThatFits:region];
+    /*CLLocationDegrees longitudeDelta = region.span.longitudeDelta;
+    CGFloat mapWidthInPixels = self.bounds.size.width * [UIScreen mainScreen].scale;
+    double zoomScale = longitudeDelta * MERCATOR_RADIUS * M_PI / (180.0 * mapWidthInPixels);
+    double zoomer = MAX_GOOGLE_LEVELS - log2( zoomScale );
+    NSLog(@"setRegion():new_region.center[%f,%f] span:%f,%f,  zoom=%f",
+          region.center.latitude,region.center.longitude, region.span.latitudeDelta,region.span.longitudeDelta,
+          zoomer);
+    if ( zoomer < 1 ) zoomer = 18;*/
+    BMKMapStatus *mapStatus = [[BMKMapStatus alloc]init];
+    mapStatus.fLevel = 16;
+    mapStatus.fOverlooking = 0;
+    mapStatus.targetGeoPt = CLLocationCoordinate2DMake(region.center.latitude,region.center.longitude);
+    [super setMapStatus:mapStatus];
 }
 
 - (void)setAnnotations:(NSArray<RCTBaiduMapAnnotation *> *)annotations
@@ -325,7 +341,7 @@ const CGFloat RCTBaiduMapZoomBoundBuffer = 0.01;
         BMKCoordinateSpan span = BMKCoordinateSpanMake(maxLat - minLat + 0.02, maxLon - minLon + 0.02);
         
         BMKCoordinateRegion region = BMKCoordinateRegionMake(center, span);
-        
+        NSLog(@"zoomToSpan().span=%f,%f ", region.span.latitudeDelta,region.span.longitudeDelta);
         [self setRegion:region animated:YES];
 
     }
