@@ -1,6 +1,7 @@
 package com.yiyang.reactnativebaidumap;
 
 import android.util.Log;
+import android.view.*;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
@@ -21,7 +22,6 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.RCTEventEmitter; 
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +31,7 @@ import java.util.List;
 public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMap.OnMarkerClickListener {
 
     private MapView mMapView;
+    private BaiduMapViewManager mManager;
 
     private LocationClient mLocationClient;
 
@@ -52,8 +53,9 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
     private List<ReactMapOverlay> mOverlays = new ArrayList<ReactMapOverlay>();
     private List<String> mOverlayIds = new ArrayList<String>();
 
-    public ReactMapView(MapView mapView) {
+    public ReactMapView(MapView mapView, BaiduMapViewManager manager) {
         this.mMapView = mapView;
+	this.mManager = manager;
         mapView.getMap().setOnMapStatusChangeListener(this);  
         mapView.getMap().setOnMarkerClickListener(this);  
     }
@@ -63,7 +65,6 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
     }
     public void onMapStatusChangeFinish(MapStatus status) {
         LatLng center = status.target;
-        //geoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(cenpt));
         //System.out.println("lat:"+center.latitude+", lng:"+center.longitude);
         WritableMap region = Arguments.createMap();
         region.putDouble("latitude",center.latitude);
@@ -71,26 +72,30 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
         region.putDouble("zoom",status.zoom);
         region.putDouble("latitudeDelta",Math.abs(status.bound.northeast.latitude-status.bound.southwest.latitude));
         region.putDouble("longitudeDelta",Math.abs(status.bound.northeast.longitude-status.bound.southwest.longitude));
-        ReactContext reactContext = (ReactContext)this.mMapView.getContext();
-        //reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("regionChange", event);
         WritableMap event = Arguments.createMap();
         event.putMap("region", region);
+        //reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("regionChange", event);
+        ReactContext reactContext = (ReactContext)this.mMapView.getContext();
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(this.mMapView.getId(), "topChange", event);
-        //manager.pushEvent(infoWindow, "", event);
+        //mManager.pushEvent(this.mMapView, "topChange", event);
     }
     public void onMapStatusChange(MapStatus status) {
         //updateMapState();
     }
 
     public boolean onMarkerClick(Marker marker) {
+        System.out.println("onMarkerClick:");
         WritableMap event = Arguments.createMap();
         event.putDouble("latitude", marker.getPosition().latitude);
         event.putDouble("longitude",marker.getPosition().longitude);
         event.putString("title",marker.getTitle());
         //event.putString("id",marker.getId());
         ReactContext reactContext = (ReactContext)this.mMapView.getContext();
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("markerClick", event);
-        return true;
+	//WritableMap event = Arguments.createMap();
+	//event.putMap("event", event);
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(this.mMapView.getId(), "onMarkerPress", event);
+        //return true;
+	return false; // returning false opens the callout window, if possible
     }
 
     public BaiduMap getMap() {

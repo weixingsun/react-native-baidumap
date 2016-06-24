@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.StrictMode;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
 
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
@@ -14,11 +15,14 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.ReadableType;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +38,7 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
 
     private ReactMapView mMapView;
 
-    private Context mContext;
+    private ReactContext mContext;
 
     private boolean isMapLoaded;
 
@@ -48,7 +52,7 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
     protected MapView createViewInstance(ThemedReactContext themedReactContext) {
         SDKInitializer.initialize(themedReactContext.getApplicationContext());
         MapView view = new MapView(themedReactContext);
-        mMapView = new ReactMapView(view);
+        mMapView = new ReactMapView(view,this);
         view.getMap().setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
@@ -276,5 +280,31 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
         }
 
         return result;
+    }
+
+    public void pushEvent(View view, String name, WritableMap data) {
+        mContext.getJSModule(RCTEventEmitter.class).receiveEvent(view.getId(), name, data);
+    }
+    @Override
+    @Nullable
+    public Map getExportedCustomDirectEventTypeConstants() {
+        Map map = MapBuilder.of(
+                "onMapReady", MapBuilder.of("registrationName", "onMapReady"),
+                "onPress", MapBuilder.of("registrationName", "onPress"),
+                "onLongPress", MapBuilder.of("registrationName", "onLongPress"),
+                "onMarkerPress", MapBuilder.of("registrationName", "onMarkerPress"),
+                "onMarkerSelect", MapBuilder.of("registrationName", "onMarkerSelect"),
+                "onMarkerDeselect", MapBuilder.of("registrationName", "onMarkerDeselect"),
+                "onCalloutPress", MapBuilder.of("registrationName", "onCalloutPress")
+        );
+
+        map.putAll(MapBuilder.of(
+                "onMarkerDragStart", MapBuilder.of("registrationName", "onMarkerDragStart"),
+                "onMarkerDrag", MapBuilder.of("registrationName", "onMarkerDrag"),
+                "onMarkerDragEnd", MapBuilder.of("registrationName", "onMarkerDragEnd"),
+                "onPanDrag", MapBuilder.of("registrationName", "onPanDrag")
+        ));
+
+        return map;
     }
 }
