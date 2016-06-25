@@ -9,6 +9,7 @@ import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationData;
@@ -84,12 +85,13 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
     }
 
     public boolean onMarkerClick(Marker marker) {
-        System.out.println("onMarkerClick:");
+        MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(marker.getPosition());
+        this.mMapView.getMap().animateMapStatus(update);  //.setMapStatus(u)
         WritableMap event = Arguments.createMap();
         event.putDouble("latitude", marker.getPosition().latitude);
         event.putDouble("longitude",marker.getPosition().longitude);
         event.putString("title",marker.getTitle());
-        //event.putString("id",marker.getId());
+        event.putMap("extra", Arguments.fromBundle(marker.getExtraInfo()));
         ReactContext reactContext = (ReactContext)this.mMapView.getContext();
 	//WritableMap event = Arguments.createMap();
 	//event.putMap("event", event);
@@ -159,8 +161,7 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
         List<ReactMapMarker> markersToDelete = new ArrayList<ReactMapMarker>();
         List<ReactMapMarker> markersToAdd = new ArrayList<ReactMapMarker>();
 
-        for (ReactMapMarker marker :
-                markers) {
+        for (ReactMapMarker marker : markers) {
             if (marker instanceof ReactMapMarker == false) {
                 continue;
             }
@@ -172,8 +173,7 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
             }
         }
 
-        for (ReactMapMarker marker :
-                this.mMarkers) {
+        for (ReactMapMarker marker : this.mMarkers) {
             if (marker instanceof ReactMapMarker == false) {
                 continue;
             }
@@ -184,16 +184,14 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
         }
 
         if (!markersToDelete.isEmpty()) {
-            for (ReactMapMarker marker :
-                    markersToDelete) {
+            for (ReactMapMarker marker : markersToDelete) {
                 marker.getMarker().remove();
                 this.mMarkers.remove(marker);
             }
         }
 
         if (!markersToAdd.isEmpty()) {
-            for (ReactMapMarker marker :
-                    markersToAdd) {
+            for (ReactMapMarker marker : markersToAdd) {
                 if (marker.getOptions() != null) {
                     marker.addToMap(this.getMap());
                     this.mMarkers.add(marker);

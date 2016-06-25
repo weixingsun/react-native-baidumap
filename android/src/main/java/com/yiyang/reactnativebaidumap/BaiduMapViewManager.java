@@ -9,6 +9,7 @@ import android.view.View;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.model.LatLng;
@@ -35,6 +36,9 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
     public static final String RCT_CLASS = "RCTBaiduMap";
 
     public static final int COMMAND_ZOOM_TO_LOCS = 1;
+    //public static final int ANIMATE_TO_REGION = 1;
+    public static final int ANIMATE_TO_COORDINATE = 2;
+    //public static final int FIT_TO_ELEMENTS = 3;
 
     private ReactMapView mMapView;
 
@@ -122,7 +126,7 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
         for (int i = 0; i < size; i++) {
             ReadableMap annotation = value.getMap(i);
             ReactMapMarker marker = new ReactMapMarker(this.mContext);
-            marker.buildMarker(annotation);
+            marker.buildMarker(annotation,mapView.getMap());
             markers.add(marker);
         }
 
@@ -180,6 +184,8 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
 
     @Override
     public void receiveCommand(MapView root, int commandId, @Nullable ReadableArray args) {
+        Double lat,lng, latDelta,lngDelta;
+	ReadableMap region;
         switch (commandId) {
             case COMMAND_ZOOM_TO_LOCS:
                 List<LatLng> positions = new ArrayList<LatLng>();
@@ -191,6 +197,13 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
                 }
                 this.zoomToLatLngs(root, positions);
                 break;
+            case ANIMATE_TO_COORDINATE:
+		region = args.getMap(0);
+		lng = region.getDouble("longitude");
+		lat = region.getDouble("latitude");
+		LatLng latlng = new LatLng(lat,lng);
+                MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(latlng);
+                root.getMap().animateMapStatus(update);
             default:
                 break;
         }
@@ -199,7 +212,11 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
     @javax.annotation.Nullable
     @Override
     public Map<String, Integer> getCommandsMap() {
-        return MapBuilder.of("zoomToLocs", COMMAND_ZOOM_TO_LOCS);
+        return MapBuilder.of(
+               "zoomToLocs", COMMAND_ZOOM_TO_LOCS,
+               //"animateToRegion", ANIMATE_TO_REGION,
+               "animateToCoordinate", ANIMATE_TO_COORDINATE
+	);
     }
 
     private void zoomToCenter(MapView mapView, LatLng center) {

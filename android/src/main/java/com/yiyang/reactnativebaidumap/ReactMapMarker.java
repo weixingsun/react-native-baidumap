@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
+import android.os.Bundle;
 
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
@@ -28,11 +29,13 @@ import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.Arguments;
 
 /**
  * Created by yiyang on 16/3/1.
  */
 public class ReactMapMarker {
+    //BaiduMap map;
     private Marker mMarker;
     private MarkerOptions mOptions;
 
@@ -81,7 +84,7 @@ public class ReactMapMarker {
         mLogoHolder.onAttach();
     }
 
-    public void buildMarker(ReadableMap annotation) throws Exception{
+    public void buildMarker(ReadableMap annotation, BaiduMap map) throws Exception{
         if (annotation == null) {
             throw new Exception("marker annotation must not be null");
         }
@@ -124,7 +127,9 @@ public class ReactMapMarker {
         } else {
             options.icon(defaultIcon);
         }
-
+        Bundle bundle = Arguments.toBundle(annotation);
+	this.mMarker = (Marker)map.addOverlay(this.mOptions);
+	this.mMarker.setExtraInfo(bundle);
 
     }
 
