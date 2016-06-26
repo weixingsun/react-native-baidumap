@@ -2,6 +2,8 @@ package com.yiyang.reactnativebaidumap;
 
 import android.util.Log;
 import android.view.*;
+import android.widget.TextView;
+import android.graphics.drawable.GradientDrawable;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
@@ -15,6 +17,10 @@ import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
+import com.baidu.mapapi.map.InfoWindow;
+import com.baidu.mapapi.map.InfoWindow.OnInfoWindowClickListener;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -64,9 +70,15 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
     public void onMapStatusChangeStart(MapStatus status) {
         //updateMapState();
     }
+    @Override
     public void onMapStatusChangeFinish(MapStatus status) {
+        this.sendMoveEvent(status);
+    }
+    public void onMapStatusChange(MapStatus status) {
+        //updateMapState();
+    }
+    public void sendMoveEvent(MapStatus status) {
         LatLng center = status.target;
-        //System.out.println("lat:"+center.latitude+", lng:"+center.longitude);
         WritableMap region = Arguments.createMap();
         region.putDouble("latitude",center.latitude);
         region.putDouble("longitude",center.longitude);
@@ -75,28 +87,51 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
         region.putDouble("longitudeDelta",Math.abs(status.bound.northeast.longitude-status.bound.southwest.longitude));
         WritableMap event = Arguments.createMap();
         event.putMap("region", region);
-        //reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("regionChange", event);
         ReactContext reactContext = (ReactContext)this.mMapView.getContext();
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(this.mMapView.getId(), "topChange", event);
-        //mManager.pushEvent(this.mMapView, "topChange", event);
     }
-    public void onMapStatusChange(MapStatus status) {
-        //updateMapState();
-    }
-
-    public boolean onMarkerClick(Marker marker) {
-        MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(marker.getPosition());
-        this.mMapView.getMap().animateMapStatus(update);  //.setMapStatus(u)
+    public void sendMarkerClickEvent(Marker marker){
+        ReactContext reactContext = (ReactContext)this.mMapView.getContext();
         WritableMap event = Arguments.createMap();
         event.putDouble("latitude", marker.getPosition().latitude);
         event.putDouble("longitude",marker.getPosition().longitude);
         event.putString("title",marker.getTitle());
         event.putMap("extra", Arguments.fromBundle(marker.getExtraInfo()));
-        ReactContext reactContext = (ReactContext)this.mMapView.getContext();
-	//WritableMap event = Arguments.createMap();
-	//event.putMap("event", event);
-        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(this.mMapView.getId(), "onMarkerPress", event);
-        //return true;
+        //WritableMap event = Arguments.createMap();
+        //event.putMap("event", event);
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(this.mMapView.getId(), "onMarkerPress", event); 
+    }
+    public void showInfoWindow(final Marker marker){
+        TextView tv = new TextView(this.mMapView.getContext());
+        tv.setText(marker.getTitle());
+	tv.setPadding(10, 10, 10, 10);
+
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(0xFFC0CFC0); // Changes this drawbale to use a single color instead of a gradient
+        gd.setCornerRadius(5);
+        gd.setStroke(1, 0xFF000000);
+        tv.setBackgroundDrawable(gd);
+
+	final LatLng ll = marker.getPosition();
+	OnInfoWindowClickListener listener = new OnInfoWindowClickListener(){
+	    @Override
+            public void onInfoWindowClick(){
+                //map.hideInfoWindow();
+		sendMarkerClickEvent(marker);
+	    }
+	};
+	BitmapDescriptor bd = BitmapDescriptorFactory.fromView(tv);
+        InfoWindow iw = new InfoWindow(bd, ll, -47, listener);
+	this.mMapView.getMap().showInfoWindow(iw);
+    }
+
+    public boolean onMarkerClick(Marker marker) {
+        //MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(marker.getPosition());
+        //this.mMapView.getMap().animateMapStatus(update);  //.setMapStatus(u)
+	//MapStatus status = this.mMapView.getMap().getMapStatus();
+        //this.sendMoveEvent(status);
+        this.showInfoWindow(marker);
+        //this.sendMarkerClickEvent(marker);
 	return false; // returning false opens the callout window, if possible
     }
 
@@ -109,50 +144,41 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
         List<ReactMapOverlay> overlaysToDelete = new ArrayList<ReactMapOverlay>();
         List<ReactMapOverlay> overlaysToAdd = new ArrayList<ReactMapOverlay>();
 
-        for (ReactMapOverlay overlay :
-                overlays) {
+        for (ReactMapOverlay overlay : overlays) {
             if (overlay instanceof ReactMapOverlay == false) {
                 continue;
             }
-
             newOverlayIds.add(overlay.getId());
-
             if (!mOverlayIds.contains(overlay.getId())) {
                 overlaysToAdd.add(overlay);
             }
         }
 
-        for (ReactMapOverlay overlay :
-                this.mOverlays) {
+        for (ReactMapOverlay overlay : this.mOverlays) {
             if (overlay instanceof ReactMapOverlay == false) {
                 continue;
             }
-
             if (!newOverlayIds.contains(overlay.getId())) {
                 overlaysToDelete.add(overlay);
             }
         }
 
         if (!overlaysToDelete.isEmpty()) {
-            for (ReactMapOverlay overlay :
-                    overlaysToDelete) {
+            for (ReactMapOverlay overlay : overlaysToDelete) {
                 overlay.getPolyline().remove();
                 this.mOverlays.remove(overlay);
             }
         }
 
         if (!overlaysToAdd.isEmpty()) {
-            for (ReactMapOverlay overlay:
-                    overlaysToAdd) {
+            for (ReactMapOverlay overlay: overlaysToAdd) {
                 if (overlay.getOptions() != null) {
                     overlay.addToMap(this.getMap());
                     this.mOverlays.add(overlay);
                 }
             }
         }
-
         this.mOverlayIds = newOverlayIds;
-
     }
 
     public void setMarker(List<ReactMapMarker> markers) {
@@ -223,11 +249,9 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
             }
         }
         if (overlays != null && overlays.size() > 0) {
-            for (ReactMapOverlay overlay :
-                    overlays) {
+            for (ReactMapOverlay overlay : overlays) {
                 if (overlay != null && overlay.getOptions() != null) {
-                    for (LatLng location :
-                            overlay.getOptions().getPoints()) {
+                    for (LatLng location : overlay.getOptions().getPoints()) {
                         builder.include(location);
                         hasBuilded = true;
                     }
@@ -265,7 +289,6 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
                                 .longitude(bdLocation.getLongitude())
                                 .build();
                         if (getMap().isMyLocationEnabled()) {
-
                             getMap().setMyLocationData(locData);
                         }
                     }
@@ -312,5 +335,16 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
         option.setScanSpan(1000);
         option.setCoorType("bd09ll");
         return option;
+    }
+    public void animateToRegion(LatLngBounds bounds, int duration) {
+        //startMonitoringRegion();
+        MapStatusUpdate update = MapStatusUpdateFactory.newLatLngBounds(bounds);
+        this.mMapView.getMap().animateMapStatus(update,duration);  //300
+    }
+
+    public void animateToCoordinate(LatLng coordinate, int duration) {
+        //startMonitoringRegion();
+        MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(coordinate);
+        this.mMapView.getMap().animateMapStatus(update,duration);  //300
     }
 }

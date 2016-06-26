@@ -35,7 +35,7 @@ import com.facebook.react.bridge.Arguments;
  * Created by yiyang on 16/3/1.
  */
 public class ReactMapMarker {
-    //BaiduMap map;
+    private BaiduMap map;
     private Marker mMarker;
     private MarkerOptions mOptions;
 
@@ -78,13 +78,14 @@ public class ReactMapMarker {
                 }
             };
 
-    public ReactMapMarker(Context context) {
+    public ReactMapMarker(Context context, BaiduMap map) {
         this.mContext = context;
+	this.map = map;
         mLogoHolder = DraweeHolder.create(createDraweeHierarchy(), null);
         mLogoHolder.onAttach();
     }
 
-    public void buildMarker(ReadableMap annotation, BaiduMap map) throws Exception{
+    public void buildMarker(ReadableMap annotation) throws Exception{
         if (annotation == null) {
             throw new Exception("marker annotation must not be null");
         }
@@ -128,7 +129,7 @@ public class ReactMapMarker {
             options.icon(defaultIcon);
         }
         Bundle bundle = Arguments.toBundle(annotation);
-	this.mMarker = (Marker)map.addOverlay(this.mOptions);
+	this.mMarker = (Marker)this.map.addOverlay(this.mOptions);
 	this.mMarker.setExtraInfo(bundle);
 
     }
