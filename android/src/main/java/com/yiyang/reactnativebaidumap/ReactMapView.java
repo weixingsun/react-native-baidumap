@@ -93,12 +93,10 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
     public void sendMarkerClickEvent(Marker marker){
         ReactContext reactContext = (ReactContext)this.mMapView.getContext();
         WritableMap event = Arguments.createMap();
-        event.putDouble("latitude", marker.getPosition().latitude);
-        event.putDouble("longitude",marker.getPosition().longitude);
-        event.putString("title",marker.getTitle());
-        event.putMap("extra", Arguments.fromBundle(marker.getExtraInfo()));
-        //WritableMap event = Arguments.createMap();
-        //event.putMap("event", event);
+        //event.putDouble("latitude", marker.getPosition().latitude);
+        //event.putDouble("longitude",marker.getPosition().longitude);
+        event.putString("action","annotation-click");
+        event.putMap("annotation", Arguments.fromBundle(marker.getExtraInfo()));
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(this.mMapView.getId(), "onMarkerPress", event); 
     }
     public void showInfoWindow(final Marker marker){
@@ -131,7 +129,7 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
 	//MapStatus status = this.mMapView.getMap().getMapStatus();
         //this.sendMoveEvent(status);
         this.showInfoWindow(marker);
-        //this.sendMarkerClickEvent(marker);
+        this.sendMarkerClickEvent(marker);
 	return false; // returning false opens the callout window, if possible
     }
 
