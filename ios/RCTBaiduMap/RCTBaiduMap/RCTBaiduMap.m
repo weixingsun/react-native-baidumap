@@ -1,11 +1,3 @@
-//
-//  RCTAMap.m
-//  RCTAMap
-//
-//  Created by yiyang on 16/2/26.
-//  Copyright © 2016年 creditease. All rights reserved.
-//
-
 #import "RCTBaiduMap.h"
 
 #import "RCTEventDispatcher.h"
@@ -157,7 +149,7 @@ const CGFloat RCTBaiduMapZoomBoundBuffer = 0.01;
           zoomer);
     if ( zoomer < 1 ) zoomer = 18;*/
     BMKMapStatus *mapStatus = [[BMKMapStatus alloc]init];
-    mapStatus.fLevel = 16;
+    //mapStatus.fLevel = 16;
     mapStatus.fOverlooking = 0;
     mapStatus.targetGeoPt = CLLocationCoordinate2DMake(region.center.latitude,region.center.longitude);
     [super setMapStatus:mapStatus];
@@ -202,7 +194,7 @@ const CGFloat RCTBaiduMapZoomBoundBuffer = 0.01;
     [self showAnnotations: self.annotations animated:YES];
     
     if (self.autoZoomToSpan) {
-        [self zoomToSpan];
+        //[self zoomToSpan];
     }
 }   
 

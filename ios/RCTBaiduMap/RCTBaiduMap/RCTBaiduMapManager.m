@@ -320,7 +320,7 @@ RCT_EXPORT_METHOD(zoomToLocs:(nonnull NSNumber *)reactTag
 {
     mapView.hasStartedRendering = YES;
     if (mapView.autoZoomToSpan) {
-        [mapView zoomToSpan];
+        //[mapView zoomToSpan];
     }
     [self _emitRegionChangeEvent:mapView continuous:NO];
 }
