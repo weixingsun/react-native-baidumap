@@ -414,8 +414,8 @@ const BaiduMapView= React.createClass({
       onPress = (event: Event) => {
         if (event.nativeEvent.action === 'annotation-click') {
           // TODO: Remove deprecated onAnnotationPress API call later.
-          this.props.onAnnotationPress &&
-            this.props.onAnnotationPress(event.nativeEvent.annotation);
+          this.props.onAnnotationPress && this.props.onAnnotationPress(event.nativeEvent.annotation);
+	  this.props.onMarkerPress     && this.props.onMarkerPress(event.nativeEvent.annotation);
         } else if (event.nativeEvent.action === 'callout-click') {
           const annotation = findByAnnotationId(event.nativeEvent.annotationId);
           if (annotation) {
