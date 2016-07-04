@@ -91,12 +91,12 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
 
     @ReactProp(name="rotateEnabled", defaultBoolean = true)
     public void setRotateEnabled(MapView mapView, Boolean enable) {
-//        mapView.getMap().getUiSettings().setRotateGesturesEnabled(enable);
+        mapView.getMap().getUiSettings().setRotateGesturesEnabled(enable);
     }
 
-    @ReactProp(name="pitchEnabled", defaultBoolean = false)
-    public void setTiltGestureEnabled(MapView mapView, Boolean enable) {
-//        mapView.getMap().getUiSettings().setTiltGesturesEnabled(enable);
+    @ReactProp(name="overlookEnabled", defaultBoolean = false)
+    public void setOverlookEnabled(MapView mapView, Boolean enable) {
+        mapView.getMap().getUiSettings().setOverlookingGesturesEnabled(enable);
     }
 
     @ReactProp(name="scrollEnabled", defaultBoolean = false)

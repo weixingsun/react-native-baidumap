@@ -119,7 +119,8 @@ const BaiduMapView= React.createClass({
      * angle is ignored and the map is always displayed as if the user
      * is looking straight down onto it.
      */
-    pitchEnabled: React.PropTypes.bool,
+    //pitchEnabled: React.PropTypes.bool,
+    overlookEnabled: React.PropTypes.bool,
 
     /**
      * If `false` the user won't be able to change the map region being displayed.
