@@ -150,20 +150,17 @@ const BaiduMapView= React.createClass({
      * coordinates to display.
      */
     region: React.PropTypes.shape({
-      /**
-       * Coordinates for the center of the map.
-       */
       latitude: React.PropTypes.number.isRequired,
       longitude: React.PropTypes.number.isRequired,
-
-      /**
-       * Distance between the minimum and the maximum latitude/longitude
-       * to be displayed.
-       */
       latitudeDelta: React.PropTypes.number,
       longitudeDelta: React.PropTypes.number,
     }),
-
+    initialRegion: React.PropTypes.shape({
+      latitude: React.PropTypes.number.isRequired,
+      longitude: React.PropTypes.number.isRequired,
+      latitudeDelta: React.PropTypes.number,
+      longitudeDelta: React.PropTypes.number,
+    }),
     /**
      * Map annotations with title/subtitle.
      * @platform ios
@@ -327,6 +324,15 @@ const BaiduMapView= React.createClass({
     active: React.PropTypes.bool,
   },
 
+  componentDidMount: function() {
+    const { region, initialRegion } = this.props;
+    if (region) {
+      this.refs.map.setNativeProps({ region });
+    } else if (initialRegion ) {
+      this.refs.map.setNativeProps({ region: initialRegion });
+    }
+  },
+
 
   render: function() {
     let children = [], {annotations, overlays, followUserLocation, userLocationViewParams, showsZoomControl} = this.props;
@@ -457,6 +463,7 @@ const BaiduMapView= React.createClass({
     // TODO: these should be separate events, to reduce bridge traffic
     if (this.props.onRegionChange || this.props.onRegionChangeComplete) {
       var onChange = (event: Event) => {
+	//console.log('------------------onRegionChange.continuous:'+event.nativeEvent.continuous)
         if (event.nativeEvent.continuous) {
           this.props.onRegionChange &&
             this.props.onRegionChange(event.nativeEvent.region);
@@ -486,11 +493,14 @@ const BaiduMapView= React.createClass({
     if (showsZoomControl === undefined) {
         showsZoomControl = false;
     }
-
+    let props = {
+        ...this.props,
+        region: null,
+    }
     return (
       <RCTBaiduMap
-          {...this.props}
-          ref="baiduMap"
+          {...props}
+          ref="map"
           annotations={annotations}
           children={children}
           followUserLocation={followUserLocation}
@@ -514,7 +524,7 @@ const BaiduMapView= React.createClass({
           return;
       }
       UIManager.dispatchViewManagerCommand(
-          React.findNodeHandle(this.refs["baiduMap"]),
+          React.findNodeHandle(this.refs["map"]),
           UIManager.RCTBaiduMap.Commands.zoomToLocs,
           [locs]
       );
