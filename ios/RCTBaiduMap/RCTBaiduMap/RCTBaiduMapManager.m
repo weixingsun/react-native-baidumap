@@ -157,7 +157,7 @@ RCT_EXPORT_METHOD(zoomToLocs:(nonnull NSNumber *)reactTag
                  }
              }
          }
-         
+         //NSLog(@"Manager.zoomToLocs()");
          [view zoomToSpan:resultPoints];
      }];
 }
@@ -298,17 +298,17 @@ RCT_EXPORT_METHOD(zoomToLocs:(nonnull NSNumber *)reactTag
 
 - (void)mapView:(RCTBaiduMap *)mapView regionWillChangeAnimated:(BOOL)animated
 {
-    [self _regionChanged:mapView];
-    mapView.regionChangeObserveTimer = [NSTimer timerWithTimeInterval:RCTBaiduMapRegionChangeObserveInterval target:self selector:@selector(_onTick:) userInfo:@{RCTBaiduMapViewKey: mapView} repeats:YES];
-    
-    [[NSRunLoop mainRunLoop] addTimer:mapView.regionChangeObserveTimer forMode:NSRunLoopCommonModes];
+    //[self _regionChanged:mapView];
+    //mapView.regionChangeObserveTimer = [NSTimer timerWithTimeInterval:RCTBaiduMapRegionChangeObserveInterval target:self selector:@selector(_onTick:) userInfo:@{RCTBaiduMapViewKey: mapView} repeats:YES];
+    //NSLog(@"Manager.regionWillChangeAnimated()");
+    //[[NSRunLoop mainRunLoop] addTimer:mapView.regionChangeObserveTimer forMode:NSRunLoopCommonModes];
 }
 
 - (void)mapView:(RCTBaiduMap *)mapView regionDidChangeAnimated:(BOOL)animated
 {
-    [mapView.regionChangeObserveTimer invalidate];
-    mapView.regionChangeObserveTimer = nil;
-    
+    //[mapView.regionChangeObserveTimer invalidate];
+    //mapView.regionChangeObserveTimer = nil;
+    //NSLog(@"Manager.regionDidChangeAnimated()");
     [self _regionChanged:mapView];
     
     if (mapView.hasStartedRendering) {
@@ -322,7 +322,7 @@ RCT_EXPORT_METHOD(zoomToLocs:(nonnull NSNumber *)reactTag
     if (mapView.autoZoomToSpan) {
         //[mapView zoomToSpan];
     }
-    [self _emitRegionChangeEvent:mapView continuous:NO];
+    //[self _emitRegionChangeEvent:mapView continuous:NO];
 }
 
 #pragma mark - Private

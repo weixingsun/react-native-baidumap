@@ -191,7 +191,7 @@ const CGFloat RCTBaiduMapZoomBoundBuffer = 0.01;
     }
     
     self.annotationIDs = newAnnotationIDs;
-    [self showAnnotations: self.annotations animated:YES];
+    //[self showAnnotations: self.annotations animated:NO];
     
     if (self.autoZoomToSpan) {
         //[self zoomToSpan];
@@ -236,7 +236,7 @@ const CGFloat RCTBaiduMapZoomBoundBuffer = 0.01;
     self.overlayIDs = newOverlayIDs;
     
     if (self.autoZoomToSpan) {
-        [self zoomToSpan];
+        //[self zoomToSpan];
     }
 }
 
@@ -294,15 +294,17 @@ const CGFloat RCTBaiduMapZoomBoundBuffer = 0.01;
         
         [self setRegion:region animated:YES];
     }
+    NSLog(@"Map.zoomToSpan().annotations+overlays");
 }
 
 - (void)zoomToSpan
 {
-    [self zoomToSpan:self.annotations andOverlays:self.overlays];
+    //[self zoomToSpan:self.annotations andOverlays:self.overlays];
 }
 
 - (void)zoomToSpan:(NSArray<CLLocation *> *)locations
 {
+    NSLog(@"Map.zoomToSpan().locations");
     if (locations == nil || locations.count == 0) {
         [self zoomToSpan];
     } else if (locations.count == 1) {
@@ -344,6 +346,7 @@ const CGFloat RCTBaiduMapZoomBoundBuffer = 0.01;
     BMKMapStatus *newMapStatus = [BMKMapStatus new];
     newMapStatus.targetGeoPt = coordinate;
     newMapStatus.fLevel = 16;
+    NSLog(@"Map.zoomToCenter()");
     
     [self setMapStatus:newMapStatus withAnimation:YES];
 }
