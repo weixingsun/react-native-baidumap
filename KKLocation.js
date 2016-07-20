@@ -69,7 +69,7 @@ var KKLocation = {
   watchPosition: function(success: Function, error?: Function, options?: GeoOptions): number {
     //alert('watchPosition()'+updatesEnabled)
     if (!updatesEnabled) {
-      alert('watchPosition()'+updatesEnabled+ ', options'+JSON.stringify(options))
+      //alert('watchPosition()'+updatesEnabled+ ', options'+JSON.stringify(options))
       KKLocationObserver.startObserving(options || {});
       updatesEnabled = true;
     }
