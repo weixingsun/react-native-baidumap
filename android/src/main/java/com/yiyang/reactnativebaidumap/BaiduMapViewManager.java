@@ -121,6 +121,12 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
         mapView.getMap().setMapType(typeId);
     }
 
+    @ReactProp(name="trafficEnabled", defaultBoolean = false)
+    public void setTrafficEnabled(MapView mapView, Boolean enable) {
+        Log.e(RCT_CLASS, "trafficEnabled="+enable);
+        mapView.getMap().setTrafficEnabled(enable);
+    }
+
     @ReactProp(name = "annotations")
     public void setAnnotations(MapView mapView, @Nullable ReadableArray value) throws Exception{
         if (value == null || value.size() == 0) {

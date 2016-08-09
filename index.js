@@ -128,6 +128,8 @@ const BaiduMapView= React.createClass({
      */
     scrollEnabled: React.PropTypes.bool,
 
+    trafficEnabled: React.PropTypes.bool,
+
     /**
      * The map type to be displayed.
      *
