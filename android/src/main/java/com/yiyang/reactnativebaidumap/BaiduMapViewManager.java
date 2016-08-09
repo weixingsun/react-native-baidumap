@@ -74,6 +74,12 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
         return mMapView;
     }
 
+    private final Map<String, Integer> MAP_TYPES = MapBuilder.of(
+        "standard", BaiduMap.MAP_TYPE_NORMAL,
+        "satellite", BaiduMap.MAP_TYPE_SATELLITE
+        //"hybrid", GoogleMap.MAP_TYPE_HYBRID,
+        //"terrain", GoogleMap.MAP_TYPE_TERRAIN
+    );
     @ReactProp(name="showsUserLocation", defaultBoolean = false)
     public void showsUserLocation(MapView mapView, Boolean show) {
         mMapView.setShowsUserLocation(show);
@@ -109,9 +115,10 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
         this.getMapView().setAutoZoomToSpan(enable);
     }
 
-    @ReactProp(name = "mapType", defaultInt = BaiduMap.MAP_TYPE_NORMAL)
-    public void setMapType(MapView mapView, int mapType) {
-        mapView.getMap().setMapType(mapType);
+    @ReactProp(name = "mapType")
+    public void setMapType(MapView mapView, @Nullable String mapType) {
+        int typeId = MAP_TYPES.get(mapType);
+        mapView.getMap().setMapType(typeId);
     }
 
     @ReactProp(name = "annotations")

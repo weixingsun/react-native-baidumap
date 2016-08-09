@@ -140,7 +140,7 @@ const BaiduMapView= React.createClass({
     mapType: React.PropTypes.oneOf([
       'standard',
       'satellite',
-      'hybrid',
+    //  'hybrid',
     ]),
 
     /**
