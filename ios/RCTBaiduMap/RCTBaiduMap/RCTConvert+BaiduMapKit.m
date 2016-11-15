@@ -98,7 +98,7 @@ RCT_ARRAY_CONVERTER(RCTBaiduMapOverlay)
 //    param.locationViewImgName = [self NSString:json[@"image"]];
     RCTImageSource *imageSource = [self RCTImageSource:json[@"image"]];
     if (imageSource != nil) {
-        NSString *imgName = imageSource.imageURL.lastPathComponent;
+        NSString *imgName = imageSource.request.URL.lastPathComponent;
         if (imgName != nil) {
             imgName = [imgName stringByDeletingPathExtension];
             param.locationViewImgName = imgName;
