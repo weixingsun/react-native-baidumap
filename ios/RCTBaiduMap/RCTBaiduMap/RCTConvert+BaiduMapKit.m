@@ -50,7 +50,7 @@ RCT_ENUM_CONVERTER(BMKMapType, (@{
     annotation.hasRightCallout = [self BOOL:json[@"hasRightCallout"]];
     annotation.animateDrop = [self BOOL:json[@"animateDrop"]];
     annotation.tintColor = [self UIColor:json[@"tintColor"]];
-    annotation.image = [self UIImage:json[@"image"]];
+    annotation.image = [self getImageInJson:json[@"image"]];
     annotation.viewIndex = [self NSInteger:json[@"viewIndex"] ? :@(NSNotFound)];
     annotation.leftCalloutViewIndex =
     [self NSInteger:json[@"leftCalloutViewIndex"] ?: @(NSNotFound)];
@@ -59,6 +59,23 @@ RCT_ENUM_CONVERTER(BMKMapType, (@{
     annotation.detailCalloutViewIndex =
     [self NSInteger:json[@"detailCalloutViewIndex"] ?: @(NSNotFound)];
     return annotation;
+}
++ (UIImage *) getImageInJson:(id)json
+{
+    NSString *fontName = [self NSString:json[@"font"]];
+    if(fontName){
+        NSString *glyph = [self NSString:json[@"glyph"]];
+        NSInteger *fontSize = [self NSInteger:json[@"size"]];
+        UIColor *color = [self UIColor:json[@"color"]];
+        UIFont *font = [UIFont fontWithName:fontName size:(int)fontSize];
+        NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:glyph attributes:@{NSFontAttributeName: font, NSForegroundColorAttributeName: color}];
+        CGSize iconSize = [attributedString size];
+        UIGraphicsBeginImageContextWithOptions(iconSize, NO, 0.0);
+        [attributedString drawAtPoint:CGPointMake(0, 0)];
+        return UIGraphicsGetImageFromCurrentImageContext();
+    }else{
+        return [self UIImage:json];
+    }
 }
 
 RCT_ARRAY_CONVERTER(RCTBaiduMapAnnotation)
