@@ -21,6 +21,7 @@ import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
+import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
@@ -32,7 +33,7 @@ import java.util.Map;
 /**
  * Created by yiyang on 16/3/1.
  */
-public class BaiduMapViewManager extends SimpleViewManager<MapView> {
+public class BaiduMapViewManager extends SimpleViewManager<MapView> { //ViewGroupManager<ReactMapView>{
     public static final String RCT_CLASS = "RCTBaiduMap";
 
     public static final int COMMAND_ZOOM_TO_LOCS = 1;
@@ -138,7 +139,7 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
         int size = value.size();
         for (int i = 0; i < size; i++) {
             ReadableMap annotation = value.getMap(i);
-            ReactMapMarker marker = new ReactMapMarker(this.mContext, mapView.getMap());
+            ReactMapMarker marker = new ReactMapMarker(this.mContext,mapView.getMap());
             marker.buildMarker(annotation);
             markers.add(marker);
         }
@@ -347,4 +348,23 @@ public class BaiduMapViewManager extends SimpleViewManager<MapView> {
 
         return map;
     }
+    /*@Override
+    public void addView(ReactMapView parent, View child, int index) {
+        parent.addFeature(child, index);
+    }
+
+    @Override
+    public int getChildCount(ReactMapView view) {
+        return view.getFeatureCount();
+    }
+
+    @Override
+    public View getChildAt(ReactMapView view, int index) {
+        return view.getFeatureAt(index);
+    }
+
+    @Override
+    public void removeViewAt(ReactMapView parent, int index) {
+        parent.removeFeatureAt(index);
+    }*/
 }

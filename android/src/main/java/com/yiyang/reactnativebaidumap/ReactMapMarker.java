@@ -1,10 +1,11 @@
 package com.yiyang.reactnativebaidumap;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.graphics.*;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
@@ -30,11 +31,12 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.views.text.ReactFontManager;
 
 /**
  * Created by yiyang on 16/3/1.
  */
-public class ReactMapMarker {
+public class ReactMapMarker extends ReactMapFeature{
     private BaiduMap map;
     private Marker mMarker;
     private MarkerOptions mOptions;
@@ -79,17 +81,33 @@ public class ReactMapMarker {
             };
 
     public ReactMapMarker(Context context, BaiduMap map) {
+        super(context);
         this.mContext = context;
-	this.map = map;
+        this.map = map;
         mLogoHolder = DraweeHolder.create(createDraweeHierarchy(), null);
         mLogoHolder.onAttach();
+    }
+    public ReactMapMarker(Context context) {
+        super(context);
+        this.mContext = context;
+        mLogoHolder = DraweeHolder.create(createDraweeHierarchy(), null);
+        mLogoHolder.onAttach();
+    }
+
+    public void setCoordinate(ReadableMap coordinate) {
+        LatLng position = new LatLng(coordinate.getDouble("latitude"), coordinate.getDouble("longitude"));
+        if (mOptions != null) {
+            mOptions.position(position);
+        }
+        update();
     }
 
     public void buildMarker(ReadableMap annotation) throws Exception{
         if (annotation == null) {
             throw new Exception("marker annotation must not be null");
         }
-        id = annotation.getString("id");
+        //id = Integer.parseInt(annotation.getString("id"));
+        //id = annotation.getString("id");
         MarkerOptions options = new MarkerOptions();
         double latitude = annotation.getDouble("latitude");
         double longitude = annotation.getDouble("longitude");
@@ -109,21 +127,30 @@ public class ReactMapMarker {
         this.mOptions = options;
 
         if (annotation.hasKey("image")) {
-            String imgUri = annotation.getMap("image").getString("uri");
-            if (imgUri != null && imgUri.length() > 0) {
-                if (imgUri.startsWith("http://") || imgUri.startsWith("https://")) {
-                    ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(imgUri)).build();
-                    ImagePipeline imagePipeline = Fresco.getImagePipeline();
-                    dataSource = imagePipeline.fetchDecodedImage(imageRequest,this);
-                    DraweeController controller = Fresco.newDraweeControllerBuilder()
-                            .setImageRequest(imageRequest)
-                            .setControllerListener(mLogoControllerListener)
-                            .setOldController(mLogoHolder.getController())
-                            .build();
-                    mLogoHolder.setController(controller);
-                } else {
-                    this.mOptions.icon(getBitmapDescriptorByName(imgUri));
-                }
+			ReadableMap img = annotation.getMap("image");
+            if (img.hasKey("uri") ) {
+				String imgUri = img.getString("uri");
+				if(imgUri != null && imgUri.length() > 0){
+					if (imgUri.startsWith("http://") || imgUri.startsWith("https://")) {
+						ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(imgUri)).build();
+						ImagePipeline imagePipeline = Fresco.getImagePipeline();
+						dataSource = imagePipeline.fetchDecodedImage(imageRequest,this);
+						DraweeController controller = Fresco.newDraweeControllerBuilder()
+								.setImageRequest(imageRequest)
+								.setControllerListener(mLogoControllerListener)
+								.setOldController(mLogoHolder.getController())
+								.build();
+						mLogoHolder.setController(controller);
+					} else {
+						this.mOptions.icon(getBitmapDescriptorByName(imgUri));
+					}
+				}
+            }else if(img.hasKey("font")){  // vector font icons -> font:fa-bell-o:30:#dd00ee
+                String font  = img.getString("font");
+                String glyph = img.getString("glyph");
+                Integer color = img.getInt("color");
+                Integer size  = img.getInt("size");
+                this.mOptions.icon(this.getIconForFont(font,glyph,size,color));  //"Ionicons","",34,-12942132
             }
         } else {
             options.icon(defaultIcon);
@@ -141,7 +168,10 @@ public class ReactMapMarker {
                 .build();
     }
 
-    public String getId() {return this.id;}
+    //public void setId(int id) {this.id=id;}
+    //public int getId() {return this.id;}
+    //public void setIdentifier(String id) {this.id=id;}
+    public String getIdentifier() {return this.id;}
     public Marker getMarker() {return this.mMarker;}
     public MarkerOptions getOptions() {return this.mOptions;}
 
@@ -181,6 +211,41 @@ public class ReactMapMarker {
         }
     }
 
+    @Override
+    public void addView(View child, int index) {
+        super.addView(child, index);
+        // if children are added, it means we are rendering a custom marker
+        //if (!(child instanceof AirMapCallout)) {
+        //    hasCustomMarkerView = true;
+        //}
+        update();
+    }
 
+    @Override
+    public Object getFeature() {
+        return this.mMarker;
+    }
 
+    @Override
+    public void removeFromMap(BaiduMap map) {
+        this.mMarker.remove();
+        this.mMarker = null;
+    }
+    BitmapDescriptor getIconForFont(String fontFamily, String glyph, Integer fontSize, Integer color){  //font:fa-bell-o:30:#dd00ee
+        Context context = this.mContext; //getReactApplicationContext();
+        float scale = context.getResources().getDisplayMetrics().density;
+        int size = Math.round(fontSize*scale);
+        Typeface typeface = ReactFontManager.getInstance().getTypeface(fontFamily, 0, context.getAssets());
+        Paint paint = new Paint();
+        paint.setTypeface(typeface);
+        paint.setColor(color);
+        paint.setTextSize(size);
+        paint.setAntiAlias(true);
+        Rect textBounds = new Rect();
+        paint.getTextBounds(glyph, 0, glyph.length(), textBounds);
+        Bitmap bitmap = Bitmap.createBitmap(textBounds.width(), textBounds.height(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawText(glyph, -textBounds.left, -textBounds.top, paint);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
 }

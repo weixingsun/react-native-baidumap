@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * Created by yiyang on 16/2/29.
  */
-public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMap.OnMarkerClickListener {
+public class ReactMapView /*extends ViewGroup*/ implements BaiduMap.OnMapStatusChangeListener, BaiduMap.OnMarkerClickListener {
 
     private MapView mMapView;
     private BaiduMapViewManager mManager;
@@ -128,7 +128,7 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
         //this.mMapView.getMap().animateMapStatus(update);  //.setMapStatus(u)
 	//MapStatus status = this.mMapView.getMap().getMapStatus();
         //this.sendMoveEvent(status);
-        this.showInfoWindow(marker);
+        //this.showInfoWindow(marker);
         this.sendMarkerClickEvent(marker);
 	return false; // returning false opens the callout window, if possible
     }
@@ -190,7 +190,7 @@ public class ReactMapView implements BaiduMap.OnMapStatusChangeListener, BaiduMa
                 continue;
             }
 
-            newMarkerIds.add(marker.getId());
+            newMarkerIds.add(marker.getId()+"");
 
             if (!mMarkerIds.contains(marker.getId())) {
                 markersToAdd.add(marker);

@@ -29,7 +29,8 @@ public class ReactMapPackage implements ReactPackage {
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactApplicationContext) {
         return Arrays.<ViewManager>asList(
-                new BaiduMapViewManager()
+                new BaiduMapViewManager(),
+                new ReactMarkerManager()
         );
     }
 }
